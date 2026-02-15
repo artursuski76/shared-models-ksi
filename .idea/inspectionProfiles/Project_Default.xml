@@ -1,0 +1,78 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <list>
+          <option value="aiohappyeyeballs" />
+          <option value="aiohttp" />
+          <option value="aiosignal" />
+          <option value="annotated-doc" />
+          <option value="annotated-types" />
+          <option value="anyio" />
+          <option value="APScheduler" />
+          <option value="async-timeout" />
+          <option value="attrs" />
+          <option value="beanie" />
+          <option value="blinker" />
+          <option value="certifi" />
+          <option value="charset-normalizer" />
+          <option value="click" />
+          <option value="couchbase" />
+          <option value="dnspython" />
+          <option value="et_xmlfile" />
+          <option value="exceptiongroup" />
+          <option value="fastapi" />
+          <option value="Flask" />
+          <option value="Flask-APScheduler" />
+          <option value="frozenlist" />
+          <option value="h11" />
+          <option value="idna" />
+          <option value="importlib_metadata" />
+          <option value="itsdangerous" />
+          <option value="izulu" />
+          <option value="Jinja2" />
+          <option value="lazy-model" />
+          <option value="litex.regon" />
+          <option value="lxml" />
+          <option value="MarkupSafe" />
+          <option value="motor" />
+          <option value="multidict" />
+          <option value="numpy" />
+          <option value="openpyxl" />
+          <option value="packaging" />
+          <option value="pandas" />
+          <option value="propcache" />
+          <option value="pycron" />
+          <option value="pydantic" />
+          <option value="pydantic-settings" />
+          <option value="pydantic_core" />
+          <option value="pymongo" />
+          <option value="python-dateutil" />
+          <option value="python-dotenv" />
+          <option value="python-multipart" />
+          <option value="python-slugify" />
+          <option value="pytz" />
+          <option value="PyYAML" />
+          <option value="redis" />
+          <option value="requests" />
+          <option value="six" />
+          <option value="starlette" />
+          <option value="taskiq" />
+          <option value="taskiq-dependencies" />
+          <option value="taskiq-redis" />
+          <option value="text-unidecode" />
+          <option value="typing-inspection" />
+          <option value="typing_extensions" />
+          <option value="tzdata" />
+          <option value="tzlocal" />
+          <option value="urllib3" />
+          <option value="uvicorn" />
+          <option value="Werkzeug" />
+          <option value="yarl" />
+          <option value="zipp" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>

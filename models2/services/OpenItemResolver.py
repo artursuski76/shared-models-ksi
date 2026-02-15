@@ -1,0 +1,3 @@
+class OpenItemResolver:
+    def resolve(counterparty_id: str) -> list[OpenItem]:
+        ...

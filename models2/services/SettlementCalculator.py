@@ -1,0 +1,3 @@
+class SettlementCalculator:
+    def calculate(open_items: list[OpenItem], payments: list[FinancialTransaction]) -> list[OpenItem]:
+        ...
