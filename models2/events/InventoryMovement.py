@@ -7,6 +7,7 @@ from models2.abase import BasicBasic
 from models2.enums import MovementType
 
 
+
 class InventoryMovement(BasicBasic):
     movement_id: str
     journal_entry_id: str
