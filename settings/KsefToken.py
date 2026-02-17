@@ -38,10 +38,13 @@ class KsefToken(BasicBasic):
     nip: str = Field(..., title="NIP Firmy", pattern=r"^\d{10}$")
     ksef_token: str = Field(..., title="Token KSeF", description="Token autoryzacyjny wygenerowany w aplikacji KSeF")
     environment: KsefEnvironment = Field(default=KsefEnvironment.TEST, title="Środowisko")
-
     last_sync: Optional[datetime.datetime] = Field(None, title="Data ostatniej synchronizacji")
     sync_status: SyncStatus = Field(default=SyncStatus.PENDING, title="Status synchronizacji")
     last_error: Optional[str] = Field(None, title="Ostatni błąd", description="Treść błędu z API KSeF, jeśli wystąpił")
+
+    access_token: Optional[str] = Field(None, alias="accessToken")
+    refresh_token: Optional[str] = Field(None, alias="refreshToken")
+    token_expires_at: Optional[str] = Field(None, alias="tokenExpiresAt")
 
     class FormConfig:
         prefill_initial_data = True
