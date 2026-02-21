@@ -1,45 +1,32 @@
-from typing import Annotated, Union, List
+from typing import Annotated, Union
 
-from pydantic import Field, AliasChoices, computed_field, model_validator
+from pydantic import Field, computed_field, model_validator
 
 from models2.basic.SaleInvoiceBasic import SaleInvoiceBasic
-from models2.helpers.TransactionRowSale import (EksportTowarow, Kraj0, Kraj0Art129, KrajSTD, Kraj5, Kraj8,
-                                                KrajOdwObc, KrajZW, Marza, OSS, PozaKrajem, WDT, WDU)
 from models2.helpers.sale_invoice_type import Podstawowa, Zaliczkowa, Rozliczeniowa, Korekta
 
-SaleTransactionRows = Annotated[
+RodzajFV = Annotated[
     Union[
-        EksportTowarow,
-        Kraj0,
-        Kraj0Art129,
-        KrajSTD,
-        Kraj5,
-        Kraj8,
-        KrajOdwObc,
-        KrajZW,
-        Marza,
-        OSS,
-        PozaKrajem,
-        WDT,
-        WDU
-    ],
-    Field(discriminator="vat_category"),
-]
-
-class SaleInvoice(SaleInvoiceBasic):
-
-    rodzaj_fv: Union[
         Podstawowa,
         Zaliczkowa,
         Rozliczeniowa,
         Korekta
-    ] = Field(
-        default_factory=Podstawowa,
+    ],
+    Field(
+        discriminator="rodzaj_fv"
+    )
+]
+
+
+class SaleInvoice(SaleInvoiceBasic):
+    rodzaj_fv: RodzajFV = Field(
+        default=Podstawowa,
         discriminator='rodzaj_fv',
         alias="TypTransakcji",
         title="Typ transakcji",
         exclude=True
     )
+
 
     @computed_field(alias="rodzaj_fv")
     @property
@@ -54,32 +41,25 @@ class SaleInvoice(SaleInvoiceBasic):
 
 
 
-
-
-    transaction_items: List[SaleTransactionRows] = Field(
-        default_factory=list,
-        alias="WierszTransakcji",
-        title="Pozycje księgowania",
-        validation_alias=AliasChoices("transaction_items", "WierszTransakcji"),
-        serialization_alias="transaction_items",
-    )
-
     @model_validator(mode="after")
     def validate_totals_integrity(self) -> "SaleInvoice":
         """
-        Sprawdza czy sumy w nagłówku (z SourceInvoice)
+        Sprawdza czy sumy w nagłówku (z SaleInvoiceBasic)
         zgadzają się z sumą poszczególnych wierszy.
         """
-        # 1. Najpierw wywołujemy walidację z klasy bazowej (Netto + VAT = Brutto)
-        # Pydantic robi to automatycznie, ale tutaj skupiamy się na relacji nagłówek-wiersze.
+        # Dla korekty sprawdzamy sumy z transaction_items_after (to co po korekcie)
+        if hasattr(self.rodzaj_fv, "transaction_items_after") and self.rodzaj_fv.rodzaj_fv == "Korekta":
+            items = self.rodzaj_fv.transaction_items_after
+        else:
+            items = getattr(self.rodzaj_fv, "transaction_items", [])
 
-        if not self.transaction_items:
+        if not items:
             return self
 
         # Obliczamy sumy z wierszy
-        sum_net = sum(row.amount_net for row in self.transaction_items)
-        sum_vat = sum(row.amount_vat for row in self.transaction_items)
-        sum_gross = sum(row.amount_gross for row in self.transaction_items)
+        sum_net = sum(row.amount_net for row in items)
+        sum_vat = sum(row.amount_vat for row in items)
+        sum_gross = sum(row.amount_gross for row in items)
 
         # 2. Porównanie z nagłówkiem (tolerancja 0, bo to liczby całkowite - grosze)
         if sum_net != self.total_net:
@@ -100,7 +80,7 @@ class SaleInvoice(SaleInvoiceBasic):
         list_view_fields = [
             "counterparty_id", "currency", "my_id", "date_posting", "total_net",
             "total_vat", "total_gross", "rodzaj_fv_flat", "original_payload_ref", "status",
-            "transaction_items", "transaction_items_count"
+            "transaction_items", "transaction_items_after", "transaction_items_count"
         ]
         default_sort_field = "date_posting"
         default_sort_dir = "DESC"

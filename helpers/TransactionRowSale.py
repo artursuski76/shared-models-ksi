@@ -30,23 +30,26 @@ class TransactionRowBaseSale(BaseModel):
 
     @model_validator(mode="after")
     def validate_math_base(self) -> "TransactionRowBaseSale":
-        # self.amount_net to np. 10000 (groszy)
-        # self.amount_vat to np. 2300 (groszy)
-
+        # 1. Sprawdzenie Netto + VAT = Brutto
         if self.amount_net + self.amount_vat != self.amount_gross:
             raise ValueError(
-                f"Suma Netto ({self.amount_net}) i VAT ({self.amount_vat}) != Brutto ({self.amount_gross})")
+                f"Suma Netto ({self.amount_net}) i VAT ({self.amount_vat}) != Brutto ({self.amount_gross})"
+            )
 
-        # Obliczamy VAT: (10000 * 23) / 100 = 2300
-        expected_vat = (self.amount_net * self.vat_rate_doc) / 100
+        # 2. Sprawdzenie wyliczenia VAT na podstawie stawki, jeśli stawka jest dostępna
+        vat_rate = getattr(self, "vat_rate_doc", None)
+        if vat_rate is not None:
+            # Obliczamy VAT: (netto * stawka) / 100
+            expected_vat = (self.amount_net * vat_rate) / 100
 
-        # Dopuszczamy błąd procentowy lub stały (2 grosze)
-        # Przy dużych kwotach 1% odchylenia pozwala na różnice wynikające z metod liczenia od brutto vs od netto
-        tolerance = max(5, abs(expected_vat * 0.01))
+            # Dopuszczamy błąd zaokrągleń - np. 2 grosze lub 1% przy dużych kwotach
+            # (przy liczeniu od brutto mogą wystąpić większe różnice)
+            tolerance = max(2, abs(expected_vat * 0.01))
 
-        if abs(self.amount_vat - expected_vat) > tolerance:
-            raise ValueError(
-                f"VAT ({self.amount_vat}) niezgodny ze stawką {self.vat_rate_doc}% (oczekiwano ok. {expected_vat})")
+            if abs(self.amount_vat - expected_vat) > tolerance:
+                raise ValueError(
+                    f"VAT ({self.amount_vat}) niezgodny ze stawką {vat_rate}% (oczekiwano ok. {expected_vat})"
+                )
 
         return self
 

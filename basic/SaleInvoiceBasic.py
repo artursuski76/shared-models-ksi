@@ -11,8 +11,12 @@ from models2.abase import BasicBasic
 from models2.enums import SourceInvoiceSource, SourceInvoiceStatus
 from models2.helpers.forms_type_sales_inv import DostawaWDacieWystawienia, WspolnaDataDostawy, DostawaWOkresieCzasu
 from models2.helpers.money import Money
-from models2.helpers.procedury_marzy import Nie, Tak
+from models2.helpers.sale_invoice_adnotacje import AdnotacjeNie, AdnotacjeTak
+
 from models2.xxx.h_enums import CurrencyAB
+
+
+
 
 
 class SaleInvoiceBasic(BasicBasic):
@@ -52,22 +56,18 @@ class SaleInvoiceBasic(BasicBasic):
     def date_sale_to(self) -> date | None:
         return getattr(self.date_sale, "date_sale_to", None)
 
-    cash_method: bool = False
-    self_billing: bool = False
-    reverse_charge: bool = False
-    split_payment: bool = False
-    ec_simplified: bool = False
-
-    p_marzy: Union[
-        Nie,
-        Tak
+    adnotacje: Union[
+        AdnotacjeNie,
+        AdnotacjeTak
     ] = Field(
         ...,
-        discriminator='p_marzy',
-        alias="ProceduraMarzy",
-        title="Procedura Marży",
+        discriminator='adnotacje',
+        alias="Adnotacje",
+        title="Adnotcje",
         exclude=True
     )
+
+
 
     my_id: str = Field(  # Zmieniono z UUID na str
         default_factory=lambda: secrets.token_urlsafe(16),
@@ -112,14 +112,13 @@ class SaleInvoiceBasic(BasicBasic):
     total_gross: Money = Field(title="Razem Brutto")
 
     @model_validator(mode="after")
-    def validate_totals(self) -> "SourceInvoice":
+    def validate_totals(self) -> "SaleInvoiceBasic":
         # 1. Sprawdzenie równania: Netto + VAT = Brutto (z tolerancją 1 grosza)
-        # Tutaj definiujemy zmienną pomocniczą:
         calculated_gross = self.total_net + self.total_vat
 
         if abs(self.total_gross - calculated_gross) > 1:
             raise ValueError(
-                f"Błąd sumaryczny: Netto ({self.total_net}) + VAT ({self.total_vat}) "
+                f"Błąd sumaryczny w nagłówku: Netto ({self.total_net}) + VAT ({self.total_vat}) "
                 f"daje {calculated_gross}, a w Brutto wpisano {self.total_gross}. "
                 f"Różnica przekracza 1 grosz."
             )

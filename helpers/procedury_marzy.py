@@ -3,7 +3,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 
-class Nie(BaseModel):
+class MarzaNie(BaseModel):
     p_marzy: Literal["nie"] = Field(
         "nie",
         title="Procedura Marży",
@@ -16,7 +16,7 @@ class Nie(BaseModel):
         json_schema_extra={"exclude_from_form": True}
     )
 
-class Tak(BaseModel):
+class MarzaTak(BaseModel):
     p_marzy: Literal["tak"] = Field(
         "tak",
         title="Procedura Marży",
