@@ -33,7 +33,6 @@ class SaleInvoiceBasic(BasicBasic):
         discriminator='date_sale',
         alias="DataSprzedazy",
         title="Data sprzedaży",
-        exclude=True
     )
 
     @computed_field(alias="date_sale")
@@ -64,7 +63,6 @@ class SaleInvoiceBasic(BasicBasic):
         discriminator='adnotacje',
         alias="Adnotacje",
         title="Adnotcje",
-        exclude=True
     )
 
 

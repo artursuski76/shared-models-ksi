@@ -24,7 +24,6 @@ class SaleInvoice(SaleInvoiceBasic):
         discriminator='rodzaj_fv',
         alias="TypTransakcji",
         title="Typ transakcji",
-        exclude=True
     )
 
 
