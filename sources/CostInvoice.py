@@ -1,47 +1,37 @@
 from typing import Annotated, Union, List
 
-from pydantic import Field, AliasChoices, model_validator
+from pydantic import Field, AliasChoices, model_validator, computed_field
 
-from models2.helpers.TransactionRowCost import ImportTow33a, ImportTow33aInwentarz, ImportTow33aRelacja, ImportUslug28B, \
-    ImportUslug28BRelacja, ImportUslugNie28B, ImportUslugNie28BRelacja, NabycieKrajowe, NabycieKrajoweInwentarz, \
-    NabycieKrajoweRelacja, NiePodlega, NiePodlegaInwentarz, NiePodlegaRelacja, OOKrajTowar, OOKrajTowarInwentarz, \
-    OOKrajTowarRelacja, OOKrajUsluga, OOKrajUslugaRelacja, WNT, WNTInwentarz, WNTRelacja, Wybierz
 from models2.basic.CostInvoiceBasic import CostInvoiceBasic
+from models2.helpers.cost_invoice_type import Podstawowa, Zaliczkowa, Rozliczeniowa, Korekta
 
-
-
-TransactionRow = Annotated[
+RodzajFV = Annotated[
     Union[
-        Wybierz,
-        ImportTow33a,
-        ImportTow33aInwentarz,
-        ImportTow33aRelacja,
-        ImportUslug28B,
-        ImportUslug28BRelacja,
-        ImportUslugNie28B,
-        ImportUslugNie28BRelacja,
-        NabycieKrajowe,
-        NabycieKrajoweInwentarz,
-        NabycieKrajoweRelacja,
-        NiePodlega,
-        NiePodlegaInwentarz,
-        NiePodlegaRelacja,
-        OOKrajTowar,
-        OOKrajTowarInwentarz,
-        OOKrajTowarRelacja,
-        OOKrajUsluga,
-        OOKrajUslugaRelacja,
-        WNT,
-        WNTInwentarz,
-        WNTRelacja,
+        Podstawowa,
+        Zaliczkowa,
+        Rozliczeniowa,
+        Korekta
     ],
-    Field(discriminator="vat_category"),
+    Field(
+        discriminator="rodzaj_fv"
+    )
 ]
 
 
-
-
 class CostInvoice(CostInvoiceBasic):
+    rodzaj_fv: RodzajFV = Field(
+        default=Podstawowa,
+        discriminator='rodzaj_fv',
+        alias="TypTransakcji",
+        title="Typ transakcji",
+    )
+
+
+    @computed_field(alias="rodzaj_fv")
+    @property
+    def rodzaj_fv_flat(self) -> str:
+        return self.rodzaj_fv.rodzaj_fv
+
     model_name: str = Field(
         "CostInvoice",
         title="Nazwa Modelu",
@@ -53,13 +43,7 @@ class CostInvoice(CostInvoiceBasic):
         json_schema_extra = {"exclude_from_form": True}
     )
 
-    transaction_items: List[TransactionRow] = Field(
-        default_factory=list,
-        alias="WierszTransakcji",
-        title="Pozycje księgowania",
-        validation_alias=AliasChoices("transaction_items", "WierszTransakcji"),
-        serialization_alias="transaction_items",
-    )
+
 
     @model_validator(mode="after")
     def validate_totals_integrity(self) -> "CostInvoice":

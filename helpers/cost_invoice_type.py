@@ -6,31 +6,42 @@ from pydantic import Field, AliasChoices
 
 from models2.enums_all.dane_fa_korygowanej import DaneFaKorygowanej
 from models2.enums_all.typy_korekty import SkutekPodatkowyKorekty
-from models2.helpers.TransactionRowSale import (EksportTowarow, Kraj0, Kraj0Art129, KrajSTD, Kraj5, Kraj8,
-                                                KrajOdwObc, KrajZW, Marza, OSS, PozaKrajem, WDT, WDU)
+from models2.helpers.TransactionRowCost import ImportTow33a, ImportTow33aInwentarz, ImportTow33aRelacja, ImportUslug28B, \
+    ImportUslug28BRelacja, ImportUslugNie28B, ImportUslugNie28BRelacja, NabycieKrajowe, NabycieKrajoweInwentarz, \
+    NabycieKrajoweRelacja, NiePodlega, NiePodlegaInwentarz, NiePodlegaRelacja, OOKrajTowar, OOKrajTowarInwentarz, \
+    OOKrajTowarRelacja, OOKrajUsluga, OOKrajUslugaRelacja, WNT, WNTInwentarz, WNTRelacja, Wybierz
 
 
-SaleTransactionRows = Annotated[
+TransactionRow = Annotated[
     Union[
-        KrajSTD,
-        Kraj8,
-        Kraj5,
-        KrajZW,
-        Kraj0,
-        Kraj0Art129,
-        KrajOdwObc,
-        EksportTowarow,
-        Marza,
-        OSS,
-        PozaKrajem,
-        WDT,
-        WDU
+        Wybierz,
+        ImportTow33a,
+        ImportTow33aInwentarz,
+        ImportTow33aRelacja,
+        ImportUslug28B,
+        ImportUslug28BRelacja,
+        ImportUslugNie28B,
+        ImportUslugNie28BRelacja,
+        NabycieKrajowe,
+        NabycieKrajoweInwentarz,
+        NabycieKrajoweRelacja,
+        NiePodlega,
+        NiePodlegaInwentarz,
+        NiePodlegaRelacja,
+        OOKrajTowar,
+        OOKrajTowarInwentarz,
+        OOKrajTowarRelacja,
+        OOKrajUsluga,
+        OOKrajUslugaRelacja,
+        WNT,
+        WNTInwentarz,
+        WNTRelacja,
     ],
     Field(discriminator="vat_category"),
 ]
 
-class SaleTransactionItemsBasic(BaseModel):
-    transaction_items: List[SaleTransactionRows] = Field(
+class CostTransactionItemsBasic(BaseModel):
+    transaction_items: List[TransactionRow] = Field(
         default_factory=list,
         alias="WierszTransakcji",
         title="Pozycje księgowania",
@@ -39,7 +50,7 @@ class SaleTransactionItemsBasic(BaseModel):
     )
 
 
-class Podstawowa(SaleTransactionItemsBasic):
+class Podstawowa(CostTransactionItemsBasic):
     rodzaj_fv: Literal["Podstawowa"] = Field(
         "Podstawowa",
         title="Rodzaj",
@@ -47,7 +58,7 @@ class Podstawowa(SaleTransactionItemsBasic):
     )
 
 
-class Zaliczkowa(SaleTransactionItemsBasic):
+class Zaliczkowa(CostTransactionItemsBasic):
     rodzaj_fv: Literal["Zaliczkowa"] = Field(
         "Zaliczkowa",
         title="Rodzaj",
@@ -55,25 +66,25 @@ class Zaliczkowa(SaleTransactionItemsBasic):
     )
 
 
-class Rozliczeniowa(SaleTransactionItemsBasic):
+class Rozliczeniowa(CostTransactionItemsBasic):
     rodzaj_fv: Literal["Rozliczeniowa"] = Field(
         "Rozliczeniowa",
         title="Rodzaj",
         json_schema_extra={"exclude_from_form": True}
     )
 
-class Korekta(SaleTransactionItemsBasic):
+class Korekta(CostTransactionItemsBasic):
     rodzaj_fv: Literal["Korekta"] = Field(
         "Korekta",
         title="Rodzaj",
         json_schema_extra={"exclude_from_form": True}
     )
-    transaction_items_after: List[SaleTransactionRows] = Field(
+    transaction_items_after: List[TransactionRow] = Field(
         default_factory=list,
-        alias="WierszTransakcjiPoKorekcie",
-        title="Pozycje księgowania po korekcie",
-        validation_alias=AliasChoices("transaction_items_after", "WierszTransakcjiPoKorekcie"),
-        serialization_alias="transaction_items_after",
+        alias="WierszTransakcji",
+        title="Pozycje księgowania",
+        validation_alias=AliasChoices("transaction_items", "WierszTransakcji"),
+        serialization_alias="transaction_items",
     )
     przyczyna_korekty: str = Field(
         default=None,

@@ -1,18 +1,19 @@
 import secrets
 from datetime import datetime, date, timezone
-from typing import List, Optional, Any, Dict  # Dodano Annotated
+from typing import List, Optional, Any  # Dodano Annotated
 from typing import Union
 
 from pydantic import ConfigDict
 from pydantic import Field, model_validator
 
-from models2.xxx.h_enums import CurrencyAB
-from models2.xxx.h_files import TransactionFiles
-from models2.xxx.h_transaction_types import DataWspolna, RozneDaty, SprzedazOdDo
 from models2.abase import BasicBasic
 from models2.enums import InvoiceType, SourceInvoiceSource, SourceInvoiceStatus
 from models2.helpers.FlattenMixin import FlattenMixin
 from models2.helpers.money import Money
+from models2.helpers.sale_invoice_adnotacje import AdnotacjeNie, AdnotacjeTak
+from models2.xxx.h_enums import CurrencyAB
+from models2.xxx.h_files import TransactionFiles
+from models2.xxx.h_transaction_types import DataWspolna, RozneDaty, SprzedazOdDo
 
 
 class CostInvoiceBasic(BasicBasic, FlattenMixin):
@@ -28,6 +29,16 @@ class CostInvoiceBasic(BasicBasic, FlattenMixin):
         alias="TypTransakcji",
         title="Typ transakcji",
         json_schema_extra={"flatten": True}
+    )
+
+    adnotacje: Union[
+        AdnotacjeNie,
+        AdnotacjeTak
+    ] = Field(
+        ...,
+        discriminator='adnotacje',
+        alias="Adnotacje",
+        title="Adnotcje",
     )
 
     my_id: str = Field(  # Zmieniono z UUID na str
