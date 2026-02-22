@@ -47,19 +47,23 @@ class SaleInvoice(SaleInvoiceBasic):
         Sprawdza czy sumy w nagłówku (z SaleInvoiceBasic)
         zgadzają się z sumą poszczególnych wierszy.
         """
-        # Dla korekty sprawdzamy sumy z transaction_items_after (to co po korekcie)
-        if hasattr(self.rodzaj_fv, "transaction_items_after") and self.rodzaj_fv.rodzaj_fv == "Korekta":
-            items = self.rodzaj_fv.transaction_items_after
+        # Dla korekty sprawdzamy sumy jako różnicę między 'after' a 'before'
+        if self.rodzaj_fv.rodzaj_fv == "Korekta":
+            items_before = getattr(self.rodzaj_fv, "transaction_items", [])
+            items_after = getattr(self.rodzaj_fv, "transaction_items_after", [])
+
+            sum_net = sum(row.amount_net for row in items_after) - sum(row.amount_net for row in items_before)
+            sum_vat = sum(row.amount_vat for row in items_after) - sum(row.amount_vat for row in items_before)
+            sum_gross = sum(row.amount_gross for row in items_after) - sum(row.amount_gross for row in items_before)
         else:
             items = getattr(self.rodzaj_fv, "transaction_items", [])
+            if not items:
+                return self
 
-        if not items:
-            return self
-
-        # Obliczamy sumy z wierszy
-        sum_net = sum(row.amount_net for row in items)
-        sum_vat = sum(row.amount_vat for row in items)
-        sum_gross = sum(row.amount_gross for row in items)
+            # Obliczamy sumy z wierszy
+            sum_net = sum(row.amount_net for row in items)
+            sum_vat = sum(row.amount_vat for row in items)
+            sum_gross = sum(row.amount_gross for row in items)
 
         # 2. Porównanie z nagłówkiem (tolerancja 0, bo to liczby całkowite - grosze)
         if sum_net != self.total_net:
